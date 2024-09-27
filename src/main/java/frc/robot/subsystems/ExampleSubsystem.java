@@ -23,7 +23,11 @@ import com.revrobotics.CANSparkFlex;
 import com.revrobotics.CANSparkMax;
 
 //import edu.wpi.first.wpilibj.drive.DifferentialDrive;
-//import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
+/*
+ * EXAMPLE SUBSYSTEM:
+ *  - Should NOT be used as a functioning subsystem, but rather just for reference for all code done with different items to be put in separate subsystems
+ */
 
 
 public class ExampleSubsystem extends SubsystemBase {

@@ -1,23 +1,15 @@
 package frc.robot.subsystems;
-import java.util.function.DoubleSupplier;
-
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.BooleanPublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj.AddressableLEDBuffer;
-import edu.wpi.first.wpilibj.AddressableLED;
-import edu.wpi.first.wpilibj.Servo;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import com.revrobotics.CANSparkLowLevel.MotorType;
-import com.revrobotics.CANSparkFlex;
-import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 
 
-//This is the main subsystem for network tables
+/*
+ * NETWORK TABLES SUBSYSTEM:
+ *  - this subsystem controls the output to network tables and shuffleboard (that are not related to the motors)
+ */
 
 public class NetworkTablesSubsystem extends SubsystemBase {
     DoublePublisher xPub;
@@ -35,8 +27,17 @@ public class NetworkTablesSubsystem extends SubsystemBase {
     public NetworkTablesSubsystem() {
         NetworkTableInstance inst = NetworkTableInstance.getDefault();
         NetworkTable table = inst.getTable("datatable");
+        xPub = table.getDoubleTopic("x").publish();
+        yPub = table.getDoubleTopic("y").publish();
+        xStick = table.getDoubleTopic("XStick").publish();
+        xButton = table.getBooleanTopic("xButton").publish();
+    }
 
-
+    public void periodic() {
+        xPub.set(x);
+        yPub.set(y);
+        x += 0.05;
+        y += 1.0;
     }
 
     /**

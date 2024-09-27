@@ -6,7 +6,6 @@ package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
-import frc.robot.commands.ExampleCommand;
 
 import frc.robot.subsystems.MotorSubsystem;
 import frc.robot.subsystems.NetworkTablesSubsystem;
@@ -26,23 +25,22 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
 
-  // Replace with CommandPS4Controller or CommandJoystick if needed
-
   //this is for all the other commands INCLUDING arcade drive
   private final CommandXboxController m_driverController =
       new CommandXboxController(OperatorConstants.kDriverControllerPort);
 
-  //these two joysticks are for TANK DRIVE
+  //these two joysticks are for TANK DRIVE and arcade drive using the joysticks
   private final CommandJoystick left_joystick = new CommandJoystick(1);
   private final CommandJoystick right_joystick = new CommandJoystick(0);
 
-  //SUBSYSTEMS: below consists of the creations and initializations of the subsystems used
+  //SUBSYSTEMS: below consists of the creations and initializations of the subsystems used (EXAMPLE SUBSYSTEM WILL NOT BE USED)
       //private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem(m_driverController);
       private final MotorSubsystem drive_system = new MotorSubsystem();
       private final LEDSubsystem led_system = new LEDSubsystem();
       private final NetworkTablesSubsystem nt_system = new NetworkTablesSubsystem();
 
-  /** The container for the robot. Contains subsystems, OI devices, and commands. */
+  //Below is the constructor for RobotContainer
+
   public RobotContainer() {
     // Configure the trigger bindings
     configureBindings();
@@ -64,18 +62,19 @@ public class RobotContainer {
     
     
     //trying to do the above trigger thing with drive_system here:
-      new Trigger(drive_system::motorSystemCondition)
-        .onTrue(new ExampleCommand(drive_system));
+      // new Trigger(drive_system::motorSystemCondition)
+      //   .onTrue(new ExampleCommand(drive_system));
 
-      new Trigger(led_system::LEDCondition)
-        .onTrue(new ExampleCommand())
-    
+  
 
-    
-    // m_driverController.y().whileTrue(m_exampleSubsystem.LEDCommand());
-    // m_driverController.b().whileTrue(m_exampleSubsystem.LEDCommand());
-    // m_driverController.x().whileTrue(m_exampleSubsystem.LEDCommand());
-    // m_driverController.a().whileTrue(m_exampleSubsystem.LEDCommand());
+      //command to change color of LED's based on color of button on Xbox Controller pressed
+      
+      // m_driverController.x().whileTrue(led_system.LEDCommand(1)); //blue
+      // m_driverController.y().whileTrue(led_system.LEDCommand(2)); //yellow
+      // m_driverController.b().whileTrue(led_system.LEDCommand(3)); //red
+      // m_driverController.a().whileTrue(led_system.LEDCommand(4)); //green
+
+      //MORE LED AND SERVO COMMANDS BELOW: CHANGE THEM SO THEY USE THE CREATED SPECIALIZED SUBSYSTEMS
 
     // m_driverController.start().whileTrue(m_exampleSubsystem.stickCommand(() -> m_driverController.getRawAxis(0)));
     // m_driverController.back().whileTrue(m_exampleSubsystem.LEDStickCommand(() -> m_driverController.getRawAxis(0)));
@@ -83,41 +82,45 @@ public class RobotContainer {
     // m_driverController.leftBumper().whileTrue(m_exampleSubsystem.ServoCommand(1));
     // m_driverController.rightBumper().whileTrue(m_exampleSubsystem.ServoCommand(2));
     
+    //PID COMMAND: the below binding implements a closed loop control over a single motor in MotorSubsystem
     m_driverController.a().whileTrue(drive_system.MotorPIDCommand());
 
-    //arcade drive configuration
+    //arcade drive configuration below
+
     // m_driverController.run().whileTrue(m_exampleSubsystem.arcadeDriveCommand(() -> m_driverController.getRawAxis(0), () -> m_driverController.getRawAxis(4)));
     // Commands.run(arcadeDriveCommand(() -> m_driverController.getRawAxis(0), () -> m_driverController.getRawAxis(4)));
     //Commands.run(m_driverController, m_exampleSubsystem, m_exampleSubsystem.arcadeDriveCommand(() -> m_driverController.getRawAxis(0), () -> m_driverController.getRawAxis(4)));
     
-
+/*
 
     //DEFAULT RUN COMMAND - this one is for arcade drive using command xbox controller x and y sticks
-    /* 
-    m_exampleSubsystem.setDefaultCommand(
-      m_exampleSubsystem.arcadeDriveCommand (
+    drive_system.setDefaultCommand(
+      drive_system.arcadeDriveCommand (
         () -> m_driverController.getRawAxis(0), () -> m_driverController.getRawAxis(4)
         )
-      ); */
+      );
     
+
     //DEFAULT RUN COMMAND - this one is for tank drive using command joystick x and y axis for left speed and right speed respectively
-    /* drive_system.setDefaultCommand(
+    drive_system.setDefaultCommand(
       drive_system.tankDriveCommand (
         () -> left_joystick.getRawAxis(1), () -> right_joystick.getRawAxis(1)
         )
       );
-    */
-/*
+    
+    //this command uses two joysticks for arcade drive - one for direction and speed, one for rotation
+
     drive_system.setDefaultCommand (
       drive_system.arcadeDriveJoystickCommand (
         () -> left_joystick.getRawAxis(1), () -> right_joystick.getRawAxis(0)
       )
     );
-*/
-    /* 
+    */
+    //both of the commands below use limit switches to start / stop a motor based on the switch's click / presence
+  
     m_driverController.x().whileTrue(drive_system.magneticSwitchCommand());
     m_driverController.a().whileTrue(drive_system.mechSwitchCommand());
-    */
+    
   }
 
     

@@ -8,17 +8,21 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-//This is the main subsystem that will be used for LED triggers and signals, as well as servos
+/* LED SUBSYSTEM:
+ *  - This is the main subsystem that will be used for LED triggers and signals, as well as servos
+ */
+
 
 public class LEDSubsystem extends SubsystemBase {
     AddressableLED led;
     AddressableLEDBuffer buffer;
     Servo servo;
 
+    //constructor below
     public LEDSubsystem() {
         servo = new Servo(0);
         led = new AddressableLED(1);
-        buffer = new AddressableLEDBuffer(24);
+        buffer = new AddressableLEDBuffer(1);
         for(int i = 0; i < buffer.getLength(); i++) {
             buffer.setRGB(i, 0, 0, 0);
         }
@@ -28,22 +32,22 @@ public class LEDSubsystem extends SubsystemBase {
     
     //FIRST COMMAND - CONTROLS THE COLOR OF LED'S BASED ON THE COLOR OF THE BUTTON ON THE CONTROLLER THAT IS PRESSED
 
-    public Command LEDCommand() {
+    public Command LEDCommand(int num) {
         return new FunctionalCommand(
             
         // ** INIT
             ()-> {},
             
             // ** EXECUTE
-            ()-> LEDExecute1(),
+            ()-> LEDExecute1(num),
             /*above takes targetvalue as raw axis in RobotContainer (see that), and will keep updating it using get as double method as
             execute gets called multiple times. see comment in execute*/
 
             // ** ON INTERRUPTED
-            interrupted-> testInterrupt1(),
+            interrupted-> LEDInterrupt1(),
             
             // ** END CONDITION
-            ()-> testEndCondition1(),
+            ()-> LEDEndCondition1(),
 
 
             // ** REQUIREMENTS
@@ -51,14 +55,15 @@ public class LEDSubsystem extends SubsystemBase {
     }
 
 
-  private void LEDExecute1()
+  private void LEDExecute1(int num)
   {
     /* value parameter are the values from get as double method in command method. set method below changes xStick value in network table
     to the value variable since set method is part of DoublePublisher class */
     //xStick.set(value);
     //maxCnt = (int) (50 - Math.abs(value) * 50);
     //count = 0;
-    if(controller.getHID().getXButton()) {
+    if(num == 1) {
+        //if X button is pressed, change LED's to blue
       for(int i = 0; i < buffer.getLength(); i++) {
         buffer.setRGB(i, 0, 0, 255);
         //servo.setSpeed(servo.getSpeed() + 0.05);
@@ -66,13 +71,15 @@ public class LEDSubsystem extends SubsystemBase {
       led.setData(buffer);
       //servo.setSpeed(0);
     }
-    else if(controller.getHID().getYButton()) {
+    else if(num == 2) {
+        //if Y button is pressed, change LED's to yellow
       for(int i = 0; i < buffer.getLength(); i++) {
         buffer.setRGB(i, 255, 255, 0);
       }
       led.setData(buffer);
     }
-    else if(controller.getHID().getBButton()) {
+    else if(num == 3) {
+        //if B button is pressed, change LED's to red
       for(int i = 0; i < buffer.getLength(); i++) {
         buffer.setRGB(i, 255, 0, 0);
         //servo.setSpeed(servo.getSpeed() + 0.05);
@@ -80,7 +87,8 @@ public class LEDSubsystem extends SubsystemBase {
       led.setData(buffer);
       //servo.setSpeed(0);
     }
-    else if(controller.getHID().getAButton()) {
+    else if(num == 4) {
+        //if A button is pressed, change LED's to green
       for(int i = 0; i < buffer.getLength(); i++) {
         buffer.setRGB(i, 0, 255, 0);
         //servo.setSpeed(servo.getSpeed() + 0.05);
@@ -91,107 +99,102 @@ public class LEDSubsystem extends SubsystemBase {
   }
 
 
-  private void testInterrupt1()
+  private void LEDInterrupt1()
   {
     //led.setData(buffer);
     //servo.setSpeed(0);
   }
 
 
-  private boolean testEndCondition1()
+  private boolean LEDEndCondition1()
   {
     return(false);
   }
 
-  /*************/
-
-  //SECOND COMMAND - HAS TO DO WITH SERVOS, AND IT TURNS THE SERVO CLOCKWISE OR COUNTERCLOCKWISE BASED ON THE DIRECTION THAT IS SPECIFIED
-  //either 1 or 2 are pressed to control which direction the servo turns
+  //THE COMMAND BELOW DEALS WITH SERVOS, AND IT TURNS THE SERVO CLOCKWISE OR COUNTERCLOCKWISE BASED ON THE DIRECTION THAT IS SPECIFIED
+  //either 1 or 2 are specified to control which direction the servo turns
+    // 1 turns it clockwise, and 2 turns it counterclockwise
 
     public Command ServoCommand(int direction)
     {
-    return new FunctionalCommand(
+        return new FunctionalCommand(
+
+            // ** INIT
+            ()-> testServoInit(),
+        
+            // ** EXECUTE
+            ()-> testServoExecute(direction),
+
+            // ** ON INTERRUPTED
+            interrupted-> testServoInterrupted1(),
+        
+            // ** END CONDITION
+            ()-> testServoEndCondition(),
+
+            // ** REQUIREMENTS
+            this
+        );
+    }
+
+    private void testServoInit() {
+        //servo.set(0.5);
+    }
+
+    private void testServoExecute(int direction) {
+    
+        if(direction == 1) {
+            //for(int i = 0; i < 5; i++) {
+            servo.set(0.6);
+            //}
+        }
+        if(direction == 2) {
+            //for(int i = 0; i < 5; i++) {
+            servo.set(0.4);
+            //}
+        } 
+    }
+
+    private void testServoInterrupted1() {
+        servo.set(0.5);
+    }
+
+    private boolean testServoEndCondition() {
+        return (false);
+    }
+
+    //THIRD COMMAND - CONTROLS THE SPEED AND DIRECTION OF THE SERVO BASED ON HOW AN AXIS OF THE CONTROLLER IS MOVED
+
+    public Command stickCommand(DoubleSupplier targetvalue) {
+        return new FunctionalCommand(
 
         // ** INIT
-        ()-> testServoInit(),
-    
+        ()-> {},
+        
         // ** EXECUTE
-        ()-> testServoExecute(direction),
+        ()-> {
+            double value = targetvalue.getAsDouble();
+            System.out.println(value);
+            servo.set((value / 2) + 0.5);
+        },
 
         // ** ON INTERRUPTED
-        interrupted-> testServoInterrupted1(),
-    
+        interrupted-> stickInterrupted1(),
+        
         // ** END CONDITION
-        ()-> testServoEndCondition(),
+        ()-> stickEndCondition(),
 
         // ** REQUIREMENTS
         this);
     }
 
-    private void testServoInit() {
-    //servo.set(0.5);
-    }
-
-    private void testServoExecute(int direction) {
-    
-    if(direction == 1) {
-        //for(int i = 0; i < 5; i++) {
-        servo.set(0.6);
-        //}
-    }
-    if(direction == 2) {
-        //for(int i = 0; i < 5; i++) {
-        servo.set(0.4);
-        //}
-    } 
-    }
-
-    private void testServoInterrupted1() {
-    servo.set(0.5);
-    }
-
-    private boolean testServoEndCondition() {
-    return (false);
-    }
-
-
-    /*************/
-
-//THIRD COMMAND - CONTROLS THE SPEED AND DIRECTION OF THE SERVO BASED ON HOW AN AXIS OF THE CONTROLLER IS MOVED
-public Command stickCommand(DoubleSupplier targetvalue)
-  {
-    return new FunctionalCommand(
-
-      // ** INIT
-      ()-> {},
-     
-      // ** EXECUTE
-      ()-> {
-        double value = targetvalue.getAsDouble();
-        System.out.println(value);
-        servo.set((value / 2) + 0.5);
-      },
-
-      // ** ON INTERRUPTED
-      interrupted-> stickInterrupted1(),
-     
-      // ** END CONDITION
-      ()-> stickEndCondition(),
-
-      // ** REQUIREMENTS
-      this);
-  }
-
   
-  private void stickInterrupted1() {
-    servo.set(0.5);
-  }
+    private void stickInterrupted1() {
+        servo.set(0.5);
+    }
 
-  private boolean stickEndCondition() {
-    return (false);
-  }
-
-  /*************/
+    private boolean stickEndCondition() {
+        return (false);
+    }
 
 
   //FOURTH COMMAND - CONTROLS THE BRIGHTNESS OF THE LED BASED ON STICK MOVEMENT
@@ -223,6 +226,7 @@ public Command stickCommand(DoubleSupplier targetvalue)
       this);
   }
 
+
   /**
    * An example method querying a boolean state of the subsystem (for example, a digital sensor).
    *
@@ -232,6 +236,5 @@ public Command stickCommand(DoubleSupplier targetvalue)
     // Query some boolean state, such as a digital sensor.
     return false;
   }
-
 
 }

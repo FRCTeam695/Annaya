@@ -73,6 +73,7 @@ public class MotorSubsystem extends SubsystemBase {
 
      lSwitch = new DigitalInput(9);
      mechSwitch = new DigitalInput(8);
+
      motor = new CANSparkFlex(53, MotorType.kBrushless);
      motor.restoreFactoryDefaults();
 
@@ -115,17 +116,17 @@ public class MotorSubsystem extends SubsystemBase {
 
   public Command tankDriveCommand(DoubleSupplier leftVal, DoubleSupplier rightVal) {
     return new RunCommand (
-        () -> {
-            double leftSpeed = leftVal.getAsDouble();
-            double rightSpeed = rightVal.getAsDouble();
+      () -> {
+          double leftSpeed = leftVal.getAsDouble();
+          double rightSpeed = rightVal.getAsDouble();
     
-            SmartDashboard.putNumber("Left Speed: ", leftSpeed);
-            SmartDashboard.putNumber("Right Speed: ", rightSpeed);
-            robotDrive.tankDrive(leftSpeed, rightSpeed);
-          }
-        ,this
-        );
-      }
+          SmartDashboard.putNumber("Left Speed: ", leftSpeed);
+          SmartDashboard.putNumber("Right Speed: ", rightSpeed);
+          robotDrive.tankDrive(leftSpeed, rightSpeed);
+        }
+      ,this
+    );
+  }
 
     public Command exampleMethodCommand() {
         // Inline construction of command goes here.
@@ -148,6 +149,9 @@ public class MotorSubsystem extends SubsystemBase {
     );
   }
 
+  //The below commands start the limit switch commands, one for magnetic and one for mechanical
+
+  //MAGNETIC
   public Command magneticSwitchCommand() {
     return new FunctionalCommand(
 
@@ -181,6 +185,7 @@ public class MotorSubsystem extends SubsystemBase {
     return false;
   }
 
+  //MECHANICAL
   public Command mechSwitchCommand() {
     return new FunctionalCommand(
 
@@ -214,7 +219,35 @@ public class MotorSubsystem extends SubsystemBase {
     return false;
   }
 
+  public void loadPreferences() {
+    if(kP != Preferences.getDouble(Constants.PID_constants.kP_value, kP)) {
+          kP = Preferences.getDouble(Constants.PID_constants.kP_value, kP);
+          pid.setP(kP);
+        }
+        
+        if(kI != Preferences.getDouble(Constants.PID_constants.kI_value, kI)) {
+          kI = Preferences.getDouble(Constants.PID_constants.kI_value, kI);
+          pid.setI(kI);
+        }
+        
+        if(kD != Preferences.getDouble(Constants.PID_constants.kD_value, kD)) {
+          kD = Preferences.getDouble(Constants.PID_constants.kD_value, kD);
+          pid.setD(kD);
+        }
 
+        if(kFF != Preferences.getDouble(Constants.PID_constants.kFF_value, kFF)) {
+          kFF = Preferences.getDouble(Constants.PID_constants.kFF_value, kFF);
+          pid.setFF(kFF);
+        }
+
+        if(setPoint != Preferences.getDouble(Constants.PID_constants.kSetPoint_value, setPoint)) {
+          setPoint = Preferences.getDouble(Constants.PID_constants.kSetPoint_value, setPoint);
+        }
+  }
+
+
+//Below starts the motor closed loop control command (MOTOR PID COMMAND)
+//Implements closed loop control on Glass as well with the graph shown
 
   public Command MotorPIDCommand() {
     return new FunctionalCommand(
@@ -222,16 +255,21 @@ public class MotorSubsystem extends SubsystemBase {
 
       () -> {
 
-        kP = Preferences.getDouble(Constants.PID_constants.kP_value, kP);
-        pid.setP(kP);
-        kI = Preferences.getDouble(Constants.PID_constants.kI_value, kI);
-        pid.setI(kI);
-        kD = Preferences.getDouble(Constants.PID_constants.kD_value, kD);
-        pid.setD(kD);
-        kFF = Preferences.getDouble(Constants.PID_constants.kFF_value, kFF);
-        pid.setFF(kFF);
+        //changing PID values based on what is acquired from Preferences controlled through Shuffleboard
+        //System.out.println(myEncoder.getVelocity());
+
+            SmartDashboard.putNumber("kP value", kP);
+            SmartDashboard.putNumber("kI value", kI);
+            SmartDashboard.putNumber("kD value", kD);
+            SmartDashboard.putNumber("kFF value", kFF);
+            SmartDashboard.putNumber("Set point value", setPoint);
+
+        
         setPoint = Preferences.getDouble(Constants.PID_constants.kSetPoint_value, setPoint);
+
+        loadPreferences();
     
+        //setting the reference to the motor - sending set point and control type
 
         pid.setReference(setPoint, CANSparkMax.ControlType.kVelocity);
         System.out.println("The motor is running");
@@ -247,8 +285,14 @@ public class MotorSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("kD", Constants.PID_constants.kD);
         SmartDashboard.putNumber("Set point: ", Constants.PID_constants.setPointRPM);
         */
+
         System.out.println("Motor speed is " + myEncoder.getVelocity());
         SmartDashboard.putNumber("Motor value: ", myEncoder.getVelocity());
+
+        //may be able to implement alternative way like this (in which we control the motor input and output rather than sending reference)
+        double rate = myEncoder.getVelocity(); //getting the velocity / rate from the motor encoder 
+        //double motorOutput = pid.calculate(rate, setPoint); //find way to calculate it
+        //motor.set(motorOutput);
       },
 
       interrupted -> {
@@ -267,9 +311,6 @@ public class MotorSubsystem extends SubsystemBase {
   private boolean motorEndCondition() {
     return false;
   }
-
-
-
 
   /**
    * An example method querying a boolean state of the subsystem (for example, a digital sensor).
