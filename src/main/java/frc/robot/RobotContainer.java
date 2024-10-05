@@ -9,6 +9,7 @@ import frc.robot.commands.Autos;
 
 import frc.robot.subsystems.MotorSubsystem;
 import frc.robot.subsystems.NetworkTablesSubsystem;
+import frc.robot.subsystems.SwerveDriveSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
 
 //import frc.robot.subsystems.ExampleSubsystem;
@@ -38,6 +39,7 @@ public class RobotContainer {
       private final MotorSubsystem drive_system = new MotorSubsystem();
       private final LEDSubsystem led_system = new LEDSubsystem();
       private final NetworkTablesSubsystem nt_system = new NetworkTablesSubsystem();
+      private final SwerveDriveSubsystem swerve_system = new SwerveDriveSubsystem();
 
   //Below is the constructor for RobotContainer
 
@@ -65,6 +67,12 @@ public class RobotContainer {
       // new Trigger(drive_system::motorSystemCondition)
       //   .onTrue(new ExampleCommand(drive_system));
 
+      //below will try to implement swerve drive using command in SwerveDriveSubsystem
+      swerve_system.setDefaultCommand(
+        swerve_system.drive(
+          () -> m_driverController.getRawAxis(1), () -> m_driverController.getRawAxis(0), () -> m_driverController.getRawAxis(4)
+        )
+      );
   
 
       //command to change color of LED's based on color of button on Xbox Controller pressed
