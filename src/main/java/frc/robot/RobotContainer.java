@@ -68,11 +68,17 @@ public class RobotContainer {
       //   .onTrue(new ExampleCommand(drive_system));
 
       //below will try to implement swerve drive using command in SwerveDriveSubsystem
-      swerve_system.setDefaultCommand(
-        swerve_system.drive(
-          () -> m_driverController.getRawAxis(1), () -> m_driverController.getRawAxis(0), () -> m_driverController.getRawAxis(4)
-        )
+       swerve_system.setDefaultCommand(
+         swerve_system.drive(
+           () -> m_driverController.getRawAxis(1), () -> m_driverController.getRawAxis(0), () -> m_driverController.getRawAxis(4)
+         )
       );
+
+      // swerve_system.setDefaultCommand (
+      //   swerve_system.spin(
+      //     () -> m_driverController.getRawAxis(1)
+      //   )
+      // );
   
 
       //command to change color of LED's based on color of button on Xbox Controller pressed
@@ -140,7 +146,7 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
   //An example command will be run in autonomous
-      return Autos.exampleAuto(drive_system);
+      return Autos.exampleAuto(swerve_system);
   }
   
 }

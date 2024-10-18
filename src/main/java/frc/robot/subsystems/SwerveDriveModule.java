@@ -6,7 +6,6 @@ import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-
 /*
  * SWERVE DRIVE MODULE:
  *   - this object class will define a single corner of a swerve drive drivetrain with TalonFX motors.
@@ -27,7 +26,7 @@ public class SwerveDriveModule {
         driveMotor = new TalonFX(driveID);
         angleMotor = new TalonFX(angleID);
         encoder = new CANcoder(encoID);
-        pid = new PIDController(0.0003, 0.000001, 0.00001);
+        pid = new PIDController(0.1, 0.000001, 0.00001);
 
     }
 
@@ -71,10 +70,30 @@ public class SwerveDriveModule {
         double speed = Math.sqrt(Math.pow(new_FWD, 2) + Math.pow(new_STR, 2));
         double steeringAngle = Math.toDegrees(Math.atan(new_STR / new_FWD));
 
+        
+        //NOTE: the code lines to send angles and speed to appropriate motors are commented right now as i am working on some corrections
+        //however, they are the lines that i will uncomment when ready to test! 
+
         //applying the speed and steering angle setpoints to PID controllers for the two motors
-        driveMotor.set(speed);
+        //driveMotor.set(speed);
+        //angleMotor.set(pid.calculate(getCANCoderRadians() * (180 / Math.PI), steeringAngle));
+
         SmartDashboard.putNumber("Drive motor speed: ", speed);
-        angleMotor.set(pid.calculate(getCANCoderRadians() * (180 / Math.PI), steeringAngle));
+
+        System.out.println(getCANCoderRadians() * (180 / Math.PI));
+
+        SmartDashboard.putNumber("Encoder absolute position", encoder.getAbsolutePosition().getValueAsDouble()* 2 * Math.PI * (180 / Math.PI));
+        SmartDashboard.putNumber("Steering angle: ", steeringAngle);
         SmartDashboard.putNumber("Angle motor angle: ", getCANCoderRadians() * (180 / Math.PI));
+     }
+
+     //just for testing
+     public void spin(double amount) {
+        driveMotor.set(amount);
+        System.out.println("The motor is spinning");
+     }
+
+     public CANcoder getCoder() {
+        return encoder;
      }
 }

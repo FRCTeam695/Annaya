@@ -6,20 +6,21 @@ package frc.robot.commands;
 
 //import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.MotorSubsystem;
+import frc.robot.subsystems.SwerveDriveSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /** An example command that uses an example subsystem. */
 public class ExampleCommand extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   //private final ExampleSubsystem m_subsystem;
-  private final MotorSubsystem drive;
+  private final SwerveDriveSubsystem drive;
 
   /**
    * Creates a new ExampleCommand.
    *
    * @param subsystem The subsystem used by this command.
    */
-  public ExampleCommand(MotorSubsystem subsystem) {
+  public ExampleCommand(SwerveDriveSubsystem subsystem) {
     drive = subsystem;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(subsystem);
